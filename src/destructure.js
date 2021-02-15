@@ -13,6 +13,8 @@
  */
 // this function will destructure a query/mutation operation string into a query/mutation operation object
 export function destructureQueries(queryOperationStr) {
+  // console.log(queryOperationStr)
+
   // ignore operation name by finding the beginning of the query strings
   const startIndex = queryOperationStr.indexOf('{');
   const queryStrings = queryOperationStr.substring(startIndex).trim();
@@ -20,12 +22,65 @@ export function destructureQueries(queryOperationStr) {
   const arrayOfQueryStrings = findQueryStrings(queryStrings);
   // define the type property name of the operation query/mutation
   const typePropName =
-    queryOperationStr.trim().slice(0, 8) === 'mutation'
-      ? 'mutations'
-      : 'queries';
+    queryOperationStr.trim().slice(0, 8) === 'mutation' ?
+    'mutations' :
+    'queries';
+  // let strippedProp = queryOperationStr.trim();
+  // if (strippedProp.slice(0, 3) === 'que') const typePropName = 'queries';
+  // else if (strippedProp.slice(0, 3) === 'mut') const typePropName = 'mutations';
+  // else if (strippedProp.slice(0, 3) === 'fra') const typePropName = 'fragments';
   // create a queries object from array of query strings
   const queriesObj = createQueriesObj(arrayOfQueryStrings, typePropName);
+
+  console.log(queriesObj)
   return queriesObj;
+}
+
+export function destructureQueriesWithFragments(queryOperationStr) {
+  // create a copy of the input to mutate
+  let copyStr = queryOperationStr;
+  // declare an array to hold all fragments
+  const fragments = [];
+  // helper function to separate fragment from query/mutation
+  const separateFragments = (copyStr) => {
+    let startFragIndex = copyStr.indexOf('fragment');
+    let startFragCurly = copyStr.indexOf('{', startFragIndex);
+    let endFragCurly;
+    const stack = ['{'];
+    const curlsAndParens = {
+      '}': '{',
+      ')': '('
+    };
+    for (let i = startFragCurly + 1; i < copyStr.length; i++) {
+      let char = copyStr[i];
+      if (char === '{' || char === '(') {
+        stack.push(char);
+      }
+      if (char === '}' || char === ')') {
+        let topOfStack = stack[stack.length - 1];
+        if (topOfStack === curlsAndParens[char]) stack.pop();
+      }
+      if (!stack[0]) {
+        endFragCurly = i;
+        break;
+      }
+    }
+    let fragment = copyStr.slice(startFragIndex, endFragCurly + 1);
+    fragments.push(fragment);
+    let newStr = copyStr.replace(fragment, '');
+    return newStr;
+  }
+  // keep calling helper function as long as 'fragment' is found in the string
+  while (copyStr.indexOf('fragment') !== -1) {
+    copyStr = separateFragments(copyStr);
+  }
+  // return an object with an array of fragment strings, as well as the query/mutation
+  // separated from the fragments
+  const result = {
+  	fragArray: fragments,
+    strippedString: copyStr
+  }
+  return result;
 }
 
 // helper function to create an array of individual query strings from an operation string
@@ -166,3 +221,71 @@ export function findClosingBrace(str, index) {
 }
 
 export default destructureQueries;
+
+/*function destructureQueriesWithFragments(queryOperationStr) {
+  let copyStr = queryOperationStr;
+  const fragments = [];
+  
+  const separateFragments = (copyStr) => {
+    let startFragIndex = copyStr.indexOf('fragment');
+    let startFragCurly = copyStr.indexOf('{', startFragIndex);
+    let endFragCurly;
+    const stack = ['{'];
+    const curlsAndParens = {
+      '}': '{',
+      ')': '('
+    };
+    for (let i = startFragCurly + 1; i < copyStr.length; i++) {
+      let char = copyStr[i];
+      if (char === '{' || char === '(') {
+        stack.push(char);
+      }
+      if (char === '}' || char === ')') {
+        let topOfStack = stack[stack.length - 1];
+        if (topOfStack === curlsAndParens[char]) stack.pop();
+      }
+      if (!stack[0]) {
+        endFragCurly = i;
+        break;
+      }
+    }
+    let fragment = copyStr.slice(startFragIndex, endFragCurly + 1);
+    fragments.push(fragment);
+    let newStr = copyStr.replace(fragment, '');
+    return newStr;
+  }
+  
+  while (copyStr.indexOf('fragment') !== -1) {
+    copyStr = separateFragments(copyStr);
+  }
+  const result = {
+  	fragArray: fragments,
+    strippedString: copyStr
+  }
+  return result;
+}
+
+let str = `query { 
+  viewer { 
+    ...LoginAndID
+  }
+}
+
+mutation {
+  hi
+}
+
+fragment secondFrag on User {
+	{}
+	()
+}
+
+fragment LoginAndID on User {
+  login
+  id
+	{ hi hi hi hello}
+	()
+}`;
+
+console.log(destructureQueriesWithFragments(str));
+*/
