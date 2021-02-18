@@ -80,7 +80,14 @@ export function destructureQueriesWithFragments(queryOperationStr) {
   	fragArray: fragments,
     strippedString: copyStr
   }
+  console.log('result object :', result);
   return result;
+  // save fragments as object:
+  // {
+  //   types,
+  //   name of fragments,
+  //   fields,
+  // }
 }
 
 // helper function to create an array of individual query strings from an operation string
@@ -115,6 +122,7 @@ export function findQueryStrings(queryStrings) {
       continue;
     }
   }
+  console.log('findQueryString result: ', result);
   return result;
 }
 // helper function to create a queries object from an array of query strings
@@ -205,6 +213,7 @@ export function findQueryFields(fieldsStr) {
     // adds current non-whitespace character in fieldCache
     if (char.match(/\S/)) fieldCache += char;
   }
+  console.log('findQueryFields result: ', fieldsObj);
   return fieldsObj;
 }
 
