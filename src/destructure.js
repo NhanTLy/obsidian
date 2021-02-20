@@ -80,14 +80,24 @@ export function destructureQueriesWithFragments(queryOperationStr) {
   	fragArray: fragments,
     strippedString: copyStr
   }
+
+  // let fragmentTree = [];
+  // const parseFrag = (fragment) => {
+  //   const fragName = fragment.substring(fragment.indexOf('fragment') + 8, fragment.indexOf(' on')).trim();
+  //   const fragType = fragment.substring(fragment.indexOf(' on') + 3, fragment.indexOf('{')).trim();
+  //   const fieldStr = fragment.substring(fragment.indexOf('{') + 1, fragment.indexOf('}'));
+  //   let fieldArr = fieldStr.split('\n');
+  //   fieldArr = fieldArr.map(el => el.trim());
+  //   let fragmentNode = {
+  //     name: fragName,
+  //     on_type: fragType,
+  //     fields: fieldArr
+  //   }
+  //   fragmentTree.push(fragmentNode);
+  // }
+
   console.log('result object :', result);
   return result;
-  // save fragments as object:
-  // {
-  //   types,
-  //   name of fragments,
-  //   fields,
-  // }
 }
 
 // helper function to create an array of individual query strings from an operation string
